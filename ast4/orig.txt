@@ -1,0 +1,87 @@
+findLeastCost:
+# here to visualize---------------------
+#bOrd1:	.word	4
+
+# brd1:	.word	3, 0, 0, 0
+#    	.word	7, 4, 0, 0
+#   	.word	4, 2, 6, 0
+#   	.word	8, 2, 9, 5
+
+	move   $t0, $a0     # tri order
+	move   $t1, $a1     # tri add
+
+	li     $t2, 0       #  colomn
+	li     $t3, 0       #  row
+	li     $t9, 0	    # running sum
+#	li     $t8, 0       # possible solutions
+
+    # addr(r,c) = baseAddr + (r * colSize + c) * dataSize
+	mul   $t4, $t3, $t0   # row * col
+	add   $t4, $t4, $t2   # (row * col) + col
+	mul   $t4, $t4, 4     # data size
+	add   $t4, $t4, $t1   # base add
+	lw    $t5, ($t4)      # saves actual val in $t5
+
+	add   $t9, $t9, $t5   # t9 running sum
+
+		leftorRight:	
+			add   $t3, $t3, 1     # next row	
+			mul   $t4, $t3, $t0   # row * col
+			add   $t4, $t4, $t2   # (row * col) + col
+			mul   $t4, $t4, 4     # data size
+			add   $t4, $t4, $t1   # base add
+			# (1,0)
+			lw    $t6, ($t4)      # saves actual val in $t6
+
+			add   $t2, $t2, 1     # next col
+			mul   $t4, $t3, $t0   # row * col
+			add   $t4, $t4, $t2   # (row * col) + col
+			mul   $t4, $t4, 4     # data size
+			add   $t4, $t4, $t1   # base add
+			# (1,1))
+			lw    $t7, ($t4)      # saves actual val in $t7
+			
+			bleu  $t7, $t6, addRight
+			j     addLeft
+
+	addRight:
+		add    $t9, $t9, $t6
+		sub    $t2, $t2, 1
+		j      addDone
+	addLeft:
+		add    $t9, $t9, $t7
+		j      addDone
+	addDone:
+		bgtu   $t0, $t3, leftorRight
+
+	
+
+# printing==================================================
+
+	# prints leas cost trav
+		la    $a0, LCmsg
+		li    $v0, 4       # call code for string
+		syscall
+
+		move $a0, $t9
+		li $v0, 1 
+		syscall
+
+		la	  $a0, newLine
+		li    $v0, 4
+		syscall
+	# prints possible solutions
+		la    $a0, PSmsg
+		li    $v0, 4       # call code for string
+		syscall
+
+		la	  $a0, newLine
+		li    $v0, 4
+		syscall
+
+	# prints newline 
+	la	  $a0, newLine
+	li    $v0, 4
+	syscall
+
+#==========================================================
